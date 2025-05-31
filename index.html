@@ -3,42 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>座席表ランダム作成</title>
+    <title>Welcome - Modern Homepage</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>座席表ランダム作成</h1>
-        
-        <div class="input-section">
-            <div class="input-group">
-                <label for="peopleCount">人数：</label>
-                <input type="number" id="peopleCount" min="1" max="100" value="20" />
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">✦</span>
+                <span class="brand-text">MODERN</span>
             </div>
-            
-            <div class="input-group">
-                <label for="rows">行数：</label>
-                <input type="number" id="rows" min="1" max="20" value="5" />
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">ホーム</a></li>
+                <li><a href="#about" class="nav-link">私たちについて</a></li>
+                <li><a href="#services" class="nav-link">サービス</a></li>
+                <li><a href="#portfolio" class="nav-link">ポートフォリオ</a></li>
+                <li><a href="#contact" class="nav-link">お問い合わせ</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
-            
-            <div class="input-group">
-                <label for="columns">列数：</label>
-                <input type="number" id="columns" min="1" max="20" value="4" />
-            </div>
-            
-            <button id="generateBtn" class="generate-btn">座席表を作成</button>
         </div>
-        
-        <div id="errorMessage" class="error-message"></div>
-        
-        <div id="seatingChart" class="seating-chart"></div>
-        
-        <div id="unassignedPeople" class="unassigned-section" style="display: none;">
-            <h3>座席に収まらなかった人：</h3>
-            <div id="unassignedList"></div>
+    </nav>
+
+    <header id="home" class="hero">
+        <div class="hero-background">
+            <div class="geometric-shape shape1"></div>
+            <div class="geometric-shape shape2"></div>
+            <div class="geometric-shape shape3"></div>
         </div>
-    </div>
-    
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="title-line">未来を創造する</span>
+                <span class="title-line accent">デジタル体験</span>
+            </h1>
+            <p class="hero-subtitle">革新的なソリューションで、あなたのビジネスを次のレベルへ</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary">始めましょう</button>
+                <button class="btn btn-secondary">詳しく見る</button>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse"></div>
+        </div>
+    </header>
+
+    <section id="about" class="section about">
+        <div class="container">
+            <h2 class="section-title">私たちについて</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>イノベーションと情熱</h3>
+                    <p>私たちは、最新のテクノロジーとクリエイティブな思考を組み合わせて、お客様のビジネスに革新的なソリューションを提供します。</p>
+                    <p>10年以上の経験を持つプロフェッショナルチームが、あなたのビジョンを現実に変えるお手伝いをします。</p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">完了プロジェクト</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">98%</span>
+                        <span class="stat-label">顧客満足度</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">受賞歴</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="section services">
+        <div class="container">
+            <h2 class="section-title">サービス</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">🎨</div>
+                    <h3>ウェブデザイン</h3>
+                    <p>美しく機能的なデザインで、ユーザーの心を掴みます</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">💻</div>
+                    <h3>開発</h3>
+                    <p>最新技術を活用した、高速で安全なウェブアプリケーション</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">📱</div>
+                    <h3>モバイル対応</h3>
+                    <p>すべてのデバイスで完璧に動作するレスポンシブデザイン</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🚀</div>
+                    <h3>SEO最適化</h3>
+                    <p>検索エンジンで上位表示を実現する戦略的アプローチ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="section portfolio">
+        <div class="container">
+            <h2 class="section-title">ポートフォリオ</h2>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <div class="portfolio-image"></div>
+                    <div class="portfolio-overlay">
+                        <h3>プロジェクト1</h3>
+                        <p>Eコマースサイト</p>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image"></div>
+                    <div class="portfolio-overlay">
+                        <h3>プロジェクト2</h3>
+                        <p>コーポレートサイト</p>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image"></div>
+                    <div class="portfolio-overlay">
+                        <h3>プロジェクト3</h3>
+                        <p>ウェブアプリケーション</p>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image"></div>
+                    <div class="portfolio-overlay">
+                        <h3>プロジェクト4</h3>
+                        <p>ブランディング</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section contact">
+        <div class="container">
+            <h2 class="section-title">お問い合わせ</h2>
+            <div class="contact-content">
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="お名前" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="メールアドレス" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="メッセージ" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">送信する</button>
+                </form>
+                <div class="contact-info">
+                    <div class="info-item">
+                        <h3>📍 所在地</h3>
+                        <p>東京都渋谷区1-2-3</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>📧 メール</h3>
+                        <p>info@modern.com</p>
+                    </div>
+                    <div class="info-item">
+                        <h3>📞 電話</h3>
+                        <p>03-1234-5678</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="brand-icon">✦</span>
+                    <span class="brand-text">MODERN</span>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">📘</a>
+                    <a href="#" class="social-link">🐦</a>
+                    <a href="#" class="social-link">📷</a>
+                    <a href="#" class="social-link">💼</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Modern. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
