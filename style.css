@@ -96,6 +96,20 @@ h1 {
     display: block;
 }
 
+.instructions {
+    background-color: #d1f2eb;
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    color: #27ae60;
+    font-size: 14px;
+    text-align: center;
+}
+
+.instructions p {
+    margin: 0;
+}
+
 .seating-chart {
     display: grid;
     gap: 10px;
@@ -116,6 +130,7 @@ h1 {
     font-size: 18px;
     transition: all 0.3s;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 }
 
 .seat:hover {
@@ -129,9 +144,32 @@ h1 {
     border-color: #2980b9;
 }
 
+.seat.occupied:hover {
+    cursor: default;
+    transform: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 .seat.empty {
     background-color: #ecf0f1;
     color: #95a5a6;
+}
+
+.seat.empty:hover {
+    background-color: #ffe6e6;
+    border-color: #e74c3c;
+}
+
+.seat.deleted {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #c0392b;
+    opacity: 0.7;
+}
+
+.seat.deleted:hover {
+    background-color: #c0392b;
+    opacity: 0.9;
 }
 
 .unassigned-section {

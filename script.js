@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const unassignedSection = document.getElementById('unassignedPeople');
     const unassignedList = document.getElementById('unassignedList');
 
+    // 削除された座席を記録するSet
+    let deletedSeats = new Set();
+    
     generateBtn.addEventListener('click', generateSeatingChart);
 
     function generateSeatingChart() {
@@ -23,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // エラーメッセージをクリア
         hideError();
+
+        // 削除された座席をクリア（新しい座席表を生成する際にリセット）
+        deletedSeats.clear();
 
         // 座席の総数を計算
         const totalSeats = rows * columns;
@@ -70,31 +76,49 @@ document.addEventListener('DOMContentLoaded', function() {
         // グリッドのスタイルを設定
         seatingChart.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
 
+        // 利用可能な座席のインデックスを計算
+        const availableSeats = [];
+        for (let i = 0; i < totalSeats; i++) {
+            if (!deletedSeats.has(i)) {
+                availableSeats.push(i);
+            }
+        }
+
         // 座席を作成
-        let seatIndex = 0;
+        let assignedIndex = 0;
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < columns; col++) {
+                const seatId = row * columns + col;
                 const seat = document.createElement('div');
                 seat.className = 'seat';
+                seat.dataset.seatId = seatId;
 
-                if (seatIndex < people.length) {
+                if (deletedSeats.has(seatId)) {
+                    // 削除された座席
+                    seat.classList.add('deleted');
+                    seat.textContent = '×';
+                } else if (assignedIndex < people.length && availableSeats.includes(seatId)) {
                     // 人を座席に割り当て
                     seat.classList.add('occupied');
-                    seat.textContent = `${people[seatIndex]}番`;
-                    seatIndex++;
+                    seat.textContent = `${people[assignedIndex]}番`;
+                    assignedIndex++;
                 } else {
                     // 空席
                     seat.classList.add('empty');
                     seat.textContent = '空席';
                 }
 
+                // クリックイベントを追加
+                seat.addEventListener('click', toggleSeatDeletion);
+
                 seatingChart.appendChild(seat);
             }
         }
 
         // 座席に収まらなかった人を表示
-        if (people.length > totalSeats) {
-            showUnassignedPeople(people.slice(totalSeats));
+        const unassignedPeopleCount = people.length - assignedIndex;
+        if (unassignedPeopleCount > 0) {
+            showUnassignedPeople(people.slice(assignedIndex));
         } else {
             hideUnassignedPeople();
         }
@@ -124,6 +148,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideError() {
         errorMessage.textContent = '';
         errorMessage.classList.remove('show');
+    }
+
+    function toggleSeatDeletion(event) {
+        const seat = event.currentTarget;
+        const seatId = parseInt(seat.dataset.seatId);
+        
+        // 削除された座席をクリックした場合は復元
+        if (deletedSeats.has(seatId)) {
+            deletedSeats.delete(seatId);
+        } else {
+            // 占有されていない座席のみ削除可能
+            if (!seat.classList.contains('occupied')) {
+                deletedSeats.add(seatId);
+            }
+        }
+        
+        // 現在の設定で座席表を再生成
+        const peopleCount = parseInt(peopleCountInput.value);
+        const rows = parseInt(rowsInput.value);
+        const columns = parseInt(columnsInput.value);
+        const totalSeats = rows * columns;
+        
+        // 人のリストを作成（1から人数まで）
+        const people = Array.from({ length: peopleCount }, (_, i) => i + 1);
+        
+        // 人をシャッフル
+        shuffleArray(people);
+        
+        // 座席表を再作成
+        createSeatingChart(rows, columns, people, totalSeats);
     }
 
     // 初期状態で座席表を生成
