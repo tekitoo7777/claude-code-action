@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const generateBtn = document.getElementById('generateBtn');
+    const deleteToggleBtn = document.getElementById('deleteToggleBtn');
     const peopleCountInput = document.getElementById('peopleCount');
     const rowsInput = document.getElementById('rows');
     const columnsInput = document.getElementById('columns');
@@ -8,7 +9,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const unassignedSection = document.getElementById('unassignedPeople');
     const unassignedList = document.getElementById('unassignedList');
 
+    let deleteMode = false;
+    let deletedSeats = new Set();
+
     generateBtn.addEventListener('click', generateSeatingChart);
+    deleteToggleBtn.addEventListener('click', toggleDeleteMode);
+
+    function toggleDeleteMode() {
+        deleteMode = !deleteMode;
+        deleteToggleBtn.textContent = deleteMode ? '削除モード: ON' : '削除モード: OFF';
+        deleteToggleBtn.classList.toggle('active', deleteMode);
+        seatingChart.classList.toggle('delete-mode', deleteMode);
+    }
 
     function generateSeatingChart() {
         // 入力値を取得
@@ -23,6 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // エラーメッセージをクリア
         hideError();
+
+        // 削除された座席をクリア
+        deletedSeats.clear();
 
         // 座席の総数を計算
         const totalSeats = rows * columns;
@@ -72,32 +87,92 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 座席を作成
         let seatIndex = 0;
+        let assignedPeopleIndex = 0;
+        
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < columns; col++) {
                 const seat = document.createElement('div');
                 seat.className = 'seat';
+                const seatId = `${row}-${col}`;
+                seat.dataset.seatId = seatId;
 
-                if (seatIndex < people.length) {
+                if (deletedSeats.has(seatId)) {
+                    // 削除された座席
+                    seat.classList.add('deleted');
+                    seat.textContent = '削除済';
+                } else if (assignedPeopleIndex < people.length) {
                     // 人を座席に割り当て
                     seat.classList.add('occupied');
-                    seat.textContent = `${people[seatIndex]}番`;
-                    seatIndex++;
+                    seat.textContent = `${people[assignedPeopleIndex]}番`;
+                    assignedPeopleIndex++;
                 } else {
                     // 空席
                     seat.classList.add('empty');
                     seat.textContent = '空席';
                 }
 
+                // クリックイベントを追加
+                seat.addEventListener('click', handleSeatClick);
+
                 seatingChart.appendChild(seat);
+                seatIndex++;
             }
         }
 
         // 座席に収まらなかった人を表示
-        if (people.length > totalSeats) {
-            showUnassignedPeople(people.slice(totalSeats));
+        const availableSeats = totalSeats - deletedSeats.size;
+        if (people.length > availableSeats) {
+            showUnassignedPeople(people.slice(availableSeats));
         } else {
             hideUnassignedPeople();
         }
+    }
+
+    function handleSeatClick(event) {
+        if (!deleteMode) return;
+
+        const seat = event.target;
+        const seatId = seat.dataset.seatId;
+
+        if (seat.classList.contains('deleted')) {
+            // 削除を取り消す
+            deletedSeats.delete(seatId);
+            reassignSeats();
+        } else {
+            // 座席を削除
+            deletedSeats.add(seatId);
+            seat.classList.add('deleted');
+            seat.classList.remove('occupied', 'empty');
+            seat.textContent = '削除済';
+            reassignSeats();
+        }
+    }
+
+    function reassignSeats() {
+        const peopleCount = parseInt(peopleCountInput.value);
+        const rows = parseInt(rowsInput.value);
+        const columns = parseInt(columnsInput.value);
+        const totalSeats = rows * columns;
+
+        // 人のリストを作成（現在の順番を保持）
+        const people = [];
+        const seats = seatingChart.querySelectorAll('.seat.occupied');
+        seats.forEach(seat => {
+            const personNumber = parseInt(seat.textContent.replace('番', ''));
+            if (!isNaN(personNumber)) {
+                people.push(personNumber);
+            }
+        });
+
+        // 残りの人を追加
+        for (let i = 1; i <= peopleCount; i++) {
+            if (!people.includes(i)) {
+                people.push(i);
+            }
+        }
+
+        // 座席表を再作成
+        createSeatingChart(rows, columns, people, totalSeats);
     }
 
     function showUnassignedPeople(unassignedPeople) {
