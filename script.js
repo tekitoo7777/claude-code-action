@@ -164,22 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const columns = parseInt(columnsInput.value);
         const totalSeats = rows * columns;
 
-        // 人のリストを作成（現在の順番を保持）
-        const people = [];
-        const seats = seatingChart.querySelectorAll('.seat.occupied');
-        seats.forEach(seat => {
-            const personNumber = parseInt(seat.textContent.replace('番', ''));
-            if (!isNaN(personNumber)) {
-                people.push(personNumber);
-            }
-        });
+        // 人のリストを作成（1から人数まで）
+        const people = Array.from({ length: peopleCount }, (_, i) => i + 1);
 
-        // 残りの人を追加
-        for (let i = 1; i <= peopleCount; i++) {
-            if (!people.includes(i)) {
-                people.push(i);
-            }
-        }
+        // 人をシャッフル（ランダムに配置）
+        shuffleArray(people);
 
         // 座席表を再作成
         createSeatingChart(rows, columns, people, totalSeats);
