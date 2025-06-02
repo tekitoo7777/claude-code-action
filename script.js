@@ -36,8 +36,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // エラーメッセージをクリア
         hideError();
 
-        // 削除された座席をクリア
-        deletedSeats.clear();
+        // 削除された座席の行列が変更された場合のみクリア
+        const currentSeats = seatingChart.querySelectorAll('.seat');
+        const currentRows = Math.ceil(currentSeats.length / columns);
+        if (currentRows !== rows || currentSeats.length !== rows * columns) {
+            deletedSeats.clear();
+        }
 
         // 座席の総数を計算
         const totalSeats = rows * columns;
