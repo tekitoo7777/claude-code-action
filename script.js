@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let deleteMode = false;
     let deletedSeats = new Set();
+    let previousRows = null;
+    let previousColumns = null;
 
     generateBtn.addEventListener('click', generateSeatingChart);
     deleteToggleBtn.addEventListener('click', toggleDeleteMode);
@@ -37,11 +39,15 @@ document.addEventListener('DOMContentLoaded', function() {
         hideError();
 
         // 削除された座席の行列が変更された場合のみクリア
-        const currentSeats = seatingChart.querySelectorAll('.seat');
-        const currentRows = Math.ceil(currentSeats.length / columns);
-        if (currentRows !== rows || currentSeats.length !== rows * columns) {
-            deletedSeats.clear();
+        if (previousRows !== null && previousColumns !== null) {
+            if (previousRows !== rows || previousColumns !== columns) {
+                deletedSeats.clear();
+            }
         }
+        
+        // 現在の行列サイズを保存
+        previousRows = rows;
+        previousColumns = columns;
 
         // 座席の総数を計算
         const totalSeats = rows * columns;
