@@ -9,12 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const unassignedSection = document.getElementById('unassignedPeople');
     const unassignedList = document.getElementById('unassignedList');
 
+    // State management
     let deleteMode = false;
     let deletedSeats = new Set();
-    let previousRows = null;
-    let previousColumns = null;
+    let currentRows = 0;
+    let currentColumns = 0;
+    let isInitialized = false;
 
-    generateBtn.addEventListener('click', generateSeatingChart);
+    // Event listeners
+    generateBtn.addEventListener('click', handleGenerateClick);
     deleteToggleBtn.addEventListener('click', toggleDeleteMode);
 
     function toggleDeleteMode() {
@@ -24,42 +27,126 @@ document.addEventListener('DOMContentLoaded', function() {
         seatingChart.classList.toggle('delete-mode', deleteMode);
     }
 
-    function generateSeatingChart() {
-        // 入力値を取得
+    function handleGenerateClick() {
         const peopleCount = parseInt(peopleCountInput.value);
         const rows = parseInt(rowsInput.value);
         const columns = parseInt(columnsInput.value);
 
-        // 入力値の検証
+        // Validate inputs
         if (!validateInputs(peopleCount, rows, columns)) {
             return;
         }
 
-        // エラーメッセージをクリア
         hideError();
 
-        // 削除された座席の行列が変更された場合のみクリア
-        if (previousRows !== null && previousColumns !== null) {
-            if (previousRows !== rows || previousColumns !== columns) {
-                deletedSeats.clear();
+        // Check if grid size changed
+        const gridSizeChanged = rows !== currentRows || columns !== currentColumns;
+
+        // Only clear deleted seats if grid size changed
+        if (gridSizeChanged) {
+            deletedSeats.clear();
+            currentRows = rows;
+            currentColumns = columns;
+        }
+
+        // Generate the seating chart
+        generateSeatingChart(peopleCount, rows, columns);
+    }
+
+    function generateSeatingChart(peopleCount, rows, columns) {
+        // Clear the seating chart
+        seatingChart.innerHTML = '';
+        seatingChart.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+
+        // Calculate available seats (total minus deleted)
+        const totalSeats = rows * columns;
+        const availableSeatsArray = [];
+
+        // Create all seats and identify available ones
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < columns; col++) {
+                const seatId = `${row}-${col}`;
+                if (!deletedSeats.has(seatId)) {
+                    availableSeatsArray.push(seatId);
+                }
             }
         }
-        
-        // 現在の行列サイズを保存
-        previousRows = rows;
-        previousColumns = columns;
 
-        // 座席の総数を計算
-        const totalSeats = rows * columns;
-
-        // 人のリストを作成（1から人数まで）
+        // Create shuffled people array
         const people = Array.from({ length: peopleCount }, (_, i) => i + 1);
-
-        // 人をシャッフル
         shuffleArray(people);
 
-        // 座席表を作成
-        createSeatingChart(rows, columns, people, totalSeats);
+        // Assign people to available seats
+        const seatAssignments = new Map();
+        const assignedCount = Math.min(people.length, availableSeatsArray.length);
+        
+        for (let i = 0; i < assignedCount; i++) {
+            seatAssignments.set(availableSeatsArray[i], people[i]);
+        }
+
+        // Create the visual seats
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < columns; col++) {
+                const seat = createSeat(row, col, seatAssignments);
+                seatingChart.appendChild(seat);
+            }
+        }
+
+        // Handle unassigned people
+        if (people.length > availableSeatsArray.length) {
+            showUnassignedPeople(people.slice(availableSeatsArray.length));
+        } else {
+            hideUnassignedPeople();
+        }
+
+        isInitialized = true;
+    }
+
+    function createSeat(row, col, seatAssignments) {
+        const seat = document.createElement('div');
+        seat.className = 'seat';
+        const seatId = `${row}-${col}`;
+        seat.dataset.seatId = seatId;
+
+        if (deletedSeats.has(seatId)) {
+            // Deleted seat
+            seat.classList.add('deleted');
+            seat.textContent = '削除済';
+        } else if (seatAssignments.has(seatId)) {
+            // Occupied seat
+            seat.classList.add('occupied');
+            seat.textContent = `${seatAssignments.get(seatId)}番`;
+        } else {
+            // Empty seat
+            seat.classList.add('empty');
+            seat.textContent = '空席';
+        }
+
+        // Add click event listener
+        seat.addEventListener('click', handleSeatClick);
+
+        return seat;
+    }
+
+    function handleSeatClick(event) {
+        if (!deleteMode || !isInitialized) return;
+
+        const seat = event.target;
+        const seatId = seat.dataset.seatId;
+
+        if (seat.classList.contains('deleted')) {
+            // Restore the seat
+            deletedSeats.delete(seatId);
+        } else {
+            // Delete the seat
+            deletedSeats.add(seatId);
+        }
+
+        // Regenerate with current people count
+        const peopleCount = parseInt(peopleCountInput.value);
+        const rows = parseInt(rowsInput.value);
+        const columns = parseInt(columnsInput.value);
+        generateSeatingChart(peopleCount, rows, columns);
     }
 
     function validateInputs(peopleCount, rows, columns) {
@@ -88,103 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function createSeatingChart(rows, columns, people, totalSeats) {
-        // 座席表をクリア
-        seatingChart.innerHTML = '';
-
-        // グリッドのスタイルを設定
-        seatingChart.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-
-        // 座席を作成
-        let seatIndex = 0;
-        let assignedPeopleIndex = 0;
-        
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < columns; col++) {
-                const seat = document.createElement('div');
-                seat.className = 'seat';
-                const seatId = `${row}-${col}`;
-                seat.dataset.seatId = seatId;
-
-                if (deletedSeats.has(seatId)) {
-                    // 削除された座席
-                    seat.classList.add('deleted');
-                    seat.textContent = '削除済';
-                } else if (assignedPeopleIndex < people.length) {
-                    // 人を座席に割り当て
-                    seat.classList.add('occupied');
-                    seat.textContent = `${people[assignedPeopleIndex]}番`;
-                    assignedPeopleIndex++;
-                } else {
-                    // 空席
-                    seat.classList.add('empty');
-                    seat.textContent = '空席';
-                }
-
-                // クリックイベントを追加
-                seat.addEventListener('click', handleSeatClick);
-
-                seatingChart.appendChild(seat);
-                seatIndex++;
-            }
-        }
-
-        // 座席に収まらなかった人を表示
-        const availableSeats = totalSeats - deletedSeats.size;
-        if (people.length > availableSeats) {
-            showUnassignedPeople(people.slice(availableSeats));
-        } else {
-            hideUnassignedPeople();
-        }
-    }
-
-    function handleSeatClick(event) {
-        if (!deleteMode) return;
-
-        const seat = event.target;
-        const seatId = seat.dataset.seatId;
-
-        if (seat.classList.contains('deleted')) {
-            // 削除を取り消す
-            deletedSeats.delete(seatId);
-            reassignSeats();
-        } else {
-            // 座席を削除
-            deletedSeats.add(seatId);
-            seat.classList.add('deleted');
-            seat.classList.remove('occupied', 'empty');
-            seat.textContent = '削除済';
-            reassignSeats();
-        }
-    }
-
-    function reassignSeats() {
-        const peopleCount = parseInt(peopleCountInput.value);
-        const rows = parseInt(rowsInput.value);
-        const columns = parseInt(columnsInput.value);
-        const totalSeats = rows * columns;
-
-        // 人のリストを作成（現在の順番を保持）
-        const people = [];
-        const seats = seatingChart.querySelectorAll('.seat.occupied');
-        seats.forEach(seat => {
-            const personNumber = parseInt(seat.textContent.replace('番', ''));
-            if (!isNaN(personNumber)) {
-                people.push(personNumber);
-            }
-        });
-
-        // 残りの人を追加
-        for (let i = 1; i <= peopleCount; i++) {
-            if (!people.includes(i)) {
-                people.push(i);
-            }
-        }
-
-        // 座席表を再作成
-        createSeatingChart(rows, columns, people, totalSeats);
-    }
-
     function showUnassignedPeople(unassignedPeople) {
         unassignedSection.style.display = 'block';
         unassignedList.innerHTML = '';
@@ -211,6 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.classList.remove('show');
     }
 
-    // 初期状態で座席表を生成
-    generateSeatingChart();
+    // Initialize with default values
+    handleGenerateClick();
 });
